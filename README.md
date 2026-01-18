@@ -2,6 +2,8 @@
 
 A GitHub Pages site showcasing beautiful, minimalist map posters generated using the [maptoposter](https://github.com/orangewise/maptoposter) tool.
 
+**Live Site:** https://orangewise.github.io/maps/
+
 ## Overview
 
 This repository automatically generates map posters for various cities using GitHub Actions and deploys them to GitHub Pages. The maps are created using OpenStreetMap data and rendered with different artistic themes.
