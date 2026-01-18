@@ -2,7 +2,7 @@ name: Generate Map Posters
 
 on:
   push:
-    branches: [ main, claude/gh-pages-map-posters-frIL8 ]
+    branches: [ main, claude/gh-pages-map-posters-frIL8, claude/fix-map-rendering-zoom-p3Hbo ]
   workflow_dispatch:
 
 permissions:
