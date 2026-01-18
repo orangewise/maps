@@ -2,6 +2,8 @@ name: Generate Map Posters
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
