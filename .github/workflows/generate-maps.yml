@@ -2,6 +2,8 @@ name: Generate Map Posters
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -49,15 +51,15 @@ jobs:
         mkdir -p public/images
         cd maptoposter-tool
 
-        # Generate Haarlem map with midnight_blue theme (6km radius to focus on city center)
-        python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue --distance 6000
+        # Generate Haarlem map with midnight_blue theme (3km radius to focus on city center)
+        python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue --distance 3000
         cp posters/*.png ../public/images/haarlem-midnight_blue.png || true
 
         # Clean for next map
         rm -f posters/*.png
 
-        # Generate with ocean theme (6km radius to focus on city center)
-        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean --distance 6000
+        # Generate with ocean theme (3km radius to focus on city center)
+        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean --distance 3000
         cp posters/*.png ../public/images/haarlem-ocean.png || true
 
     - name: Generate index.html
