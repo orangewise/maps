@@ -2,25 +2,28 @@ name: Generate Map Posters
 
 on:
   push:
-    branches: [ main, claude/gh-pages-map-posters-frIL8 ]
+  pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.ref }}"
   cancel-in-progress: false
 
 jobs:
-  generate-and-deploy:
+  generate-maps:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.ref || github.ref }}
+        repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
     - name: Checkout maptoposter tool
       uses: actions/checkout@v4
@@ -46,15 +49,15 @@ jobs:
         mkdir -p public/images
         cd maptoposter-tool
 
-        # Generate Haarlem map
-        python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue
-        cp posters/*.png ../public/images/ || true
+        # Generate Haarlem map with midnight_blue theme (6km radius to focus on city center)
+        python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue --distance 6000
+        cp posters/*.png ../public/images/haarlem-midnight_blue.png || true
 
         # Clean for next map
         rm -f posters/*.png
 
-        # Generate with different theme
-        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean
+        # Generate with ocean theme (6km radius to focus on city center)
+        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean --distance 6000
         cp posters/*.png ../public/images/haarlem-ocean.png || true
 
     - name: Generate index.html
@@ -243,14 +246,45 @@ jobs:
         }
         EOF
 
+    - name: Upload generated images as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: map-posters
+        path: public/images/
+        retention-days: 90
+
+    - name: Commit generated images to branch
+      if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.ref != 'refs/heads/main')
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Create images directory if it doesn't exist
+        mkdir -p images
+
+        # Copy generated images to images directory
+        cp public/images/*.png images/ || true
+
+        # Check if there are any changes
+        if [ -n "$(git status --porcelain images/)" ]; then
+          git add images/
+          git commit -m "Update generated map posters [skip ci]"
+          git push
+        else
+          echo "No changes to commit"
+        fi
+
     - name: Setup Pages
+      if: github.ref == 'refs/heads/main'
       uses: actions/configure-pages@v4
 
     - name: Upload artifact
+      if: github.ref == 'refs/heads/main'
       uses: actions/upload-pages-artifact@v3
       with:
         path: 'public'
 
     - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
       id: deployment
       uses: actions/deploy-pages@v4

@@ -83,14 +83,26 @@ python create_map_poster.py --city Haarlem --country Netherlands --theme midnigh
 
 ## GitHub Actions Workflow
 
-The `.github/workflows/generate-maps.yml` workflow:
+The `.github/workflows/generate-maps.yml` workflow runs on all branches and pull requests:
 
-1. Checks out this repository
-2. Clones the maptoposter tool
-3. Sets up Python and installs dependencies with uv
-4. Generates map posters for configured cities
-5. Creates the gallery HTML
-6. Deploys to GitHub Pages
+1. **Map Generation** (all branches):
+   - Checks out this repository
+   - Clones the maptoposter tool
+   - Sets up Python and installs dependencies with uv
+   - Generates map posters for configured cities
+   - Creates the gallery HTML and CSS
+   - Uploads generated images as artifacts (90-day retention)
+   - Commits images to the branch (except on main and forks)
+
+2. **GitHub Pages Deployment** (main branch only):
+   - Configures GitHub Pages
+   - Deploys the public gallery to https://orangewise.github.io/maps/
+
+### Accessing Generated Images
+
+- **From any branch**: Download artifacts from the workflow run (available for 90 days)
+- **From feature branches**: Images are committed to the `images/` directory
+- **From main branch**: Images are deployed to GitHub Pages
 
 ## GitHub Pages Setup
 
