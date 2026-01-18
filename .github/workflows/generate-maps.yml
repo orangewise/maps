@@ -46,15 +46,15 @@ jobs:
         mkdir -p public/images
         cd maptoposter-tool
 
-        # Generate Haarlem map
-        python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue
-        cp posters/*.png ../public/images/ || true
+        # Generate Haarlem map with midnight_blue theme (6km radius to focus on city center)
+        python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue --distance 6000
+        cp posters/*.png ../public/images/haarlem-midnight_blue.png || true
 
         # Clean for next map
         rm -f posters/*.png
 
-        # Generate with different theme
-        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean
+        # Generate with ocean theme (6km radius to focus on city center)
+        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean --distance 6000
         cp posters/*.png ../public/images/haarlem-ocean.png || true
 
     - name: Generate index.html
