@@ -208,3 +208,6 @@ __marimo__/
 
 # Generated files for GitHub Pages
 public/
+
+# Temporary tool directories
+maptoposter-tool/
