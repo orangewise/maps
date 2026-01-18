@@ -52,15 +52,37 @@ jobs:
         cd maptoposter-tool
 
         # Generate Haarlem map with midnight_blue theme (3km radius to focus on city center)
+        echo "Generating midnight_blue theme..."
         python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue --distance 3000
-        cp posters/*.png ../public/images/haarlem-midnight_blue.png || true
+        echo "Contents of posters directory:"
+        ls -lah posters/ || echo "Posters directory is empty or doesn't exist"
+
+        # Check if any PNG files were generated
+        if ls posters/*.png 1> /dev/null 2>&1; then
+          cp posters/*.png ../public/images/haarlem-midnight_blue.png
+          echo "Successfully copied midnight_blue poster"
+        else
+          echo "ERROR: midnight_blue poster was not generated"
+          exit 1
+        fi
 
         # Clean for next map
         rm -f posters/*.png
 
         # Generate with ocean theme (3km radius to focus on city center)
+        echo "Generating ocean theme..."
         python create_map_poster.py --city Haarlem --country Netherlands --theme ocean --distance 3000
-        cp posters/*.png ../public/images/haarlem-ocean.png || true
+        echo "Contents of posters directory:"
+        ls -lah posters/ || echo "Posters directory is empty or doesn't exist"
+
+        # Check if any PNG files were generated
+        if ls posters/*.png 1> /dev/null 2>&1; then
+          cp posters/*.png ../public/images/haarlem-ocean.png
+          echo "Successfully copied ocean poster"
+        else
+          echo "ERROR: ocean poster was not generated"
+          exit 1
+        fi
 
     - name: Generate index.html
       run: |
