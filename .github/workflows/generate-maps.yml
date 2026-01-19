@@ -55,7 +55,7 @@ jobs:
         rm -f posters/*.png
 
         # Generate Haarlem map with midnight_blue theme (2km radius to focus on city center)
-        echo "Generating midnight_blue theme..."
+        echo "Generating Haarlem midnight_blue theme..."
         python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue --distance 2000
         echo "Contents of posters directory:"
         ls -lah posters/ || echo "Posters directory is empty or doesn't exist"
@@ -72,18 +72,18 @@ jobs:
         # Clean for next map
         rm -f posters/*.png
 
-        # Generate with ocean theme (2km radius to focus on city center)
-        echo "Generating ocean theme..."
-        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean --distance 2000
+        # Generate Rotterdam with ocean theme (6km radius for larger area coverage)
+        echo "Generating Rotterdam ocean theme..."
+        python create_map_poster.py --city Rotterdam --country Netherlands --theme ocean --distance 6000
         echo "Contents of posters directory:"
         ls -lah posters/ || echo "Posters directory is empty or doesn't exist"
 
         # Check if any PNG files were generated and copy
         if ls posters/*.png 1> /dev/null 2>&1; then
-          cp posters/*.png ../public/images/haarlem-ocean.png
-          echo "Successfully copied ocean poster"
+          cp posters/*.png ../public/images/rotterdam-ocean.png
+          echo "Successfully copied Rotterdam ocean poster"
         else
-          echo "ERROR: ocean poster was not generated"
+          echo "ERROR: Rotterdam ocean poster was not generated"
           exit 1
         fi
 
@@ -115,11 +115,17 @@ jobs:
                                 <p>A calming blue palette perfect for modern interiors</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="city-section">
+                    <h2>Rotterdam, Netherlands</h2>
+                    <div class="poster-grid">
                         <div class="poster-card">
-                            <img src="images/haarlem-ocean.png" alt="Haarlem - Ocean" loading="lazy">
+                            <img src="images/rotterdam-ocean.png" alt="Rotterdam - Ocean" loading="lazy">
                             <div class="poster-info">
                                 <h3>Ocean</h3>
-                                <p>Deep ocean tones with crisp white streets</p>
+                                <p>Deep ocean tones with crisp white streets, 6km radius capturing the vibrant port city</p>
                             </div>
                         </div>
                     </div>
