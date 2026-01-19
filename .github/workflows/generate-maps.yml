@@ -54,9 +54,9 @@ jobs:
         # Clean posters directory before generation
         rm -f posters/*.png
 
-        # Generate Haarlem map with midnight_blue theme (3km radius to focus on city center)
+        # Generate Haarlem map with midnight_blue theme (2km radius to focus on city center)
         echo "Generating midnight_blue theme..."
-        python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue --distance 3000
+        python create_map_poster.py --city Haarlem --country Netherlands --theme midnight_blue --distance 2000
         echo "Contents of posters directory:"
         ls -lah posters/ || echo "Posters directory is empty or doesn't exist"
 
@@ -72,9 +72,9 @@ jobs:
         # Clean for next map
         rm -f posters/*.png
 
-        # Generate with ocean theme (3km radius to focus on city center)
+        # Generate with ocean theme (2km radius to focus on city center)
         echo "Generating ocean theme..."
-        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean --distance 3000
+        python create_map_poster.py --city Haarlem --country Netherlands --theme ocean --distance 2000
         echo "Contents of posters directory:"
         ls -lah posters/ || echo "Posters directory is empty or doesn't exist"
 
