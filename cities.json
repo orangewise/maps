@@ -2,11 +2,13 @@
   {
     "city": "Haarlem",
     "country": "Netherlands",
-    "themes": ["midnight_blue"]
+    "themes": ["midnight_blue"],
+    "radius": 2000
   },
   {
     "city": "Rotterdam",
     "country": "Netherlands",
-    "themes": ["ocean"]
+    "themes": ["ocean"],
+    "radius": 6000
   }
 ]
