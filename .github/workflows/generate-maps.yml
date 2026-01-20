@@ -50,39 +50,60 @@ jobs:
       run: |
         mkdir -p public/images
 
-        # Copy approved Haarlem poster (already generated, no need to regenerate)
-        echo "Copying approved Haarlem midnight_blue poster..."
-        if [ -f images/haarlem-midnight_blue.png ]; then
-          cp images/haarlem-midnight_blue.png public/images/haarlem-midnight_blue.png
-          echo "Successfully copied existing Haarlem poster"
-        else
-          echo "ERROR: Approved Haarlem poster not found"
-          exit 1
+        # Copy existing posters to public/images
+        if [ -d images ] && [ "$(ls -A images/*.png 2>/dev/null)" ]; then
+          echo "Copying existing posters..."
+          cp images/*.png public/images/
+          echo "Copied $(ls images/*.png 2>/dev/null | wc -l) existing posters"
         fi
 
+        # Install jq for JSON parsing
+        sudo apt-get update && sudo apt-get install -y jq
+
+        # Read cities.json and generate only new posters
         cd maptoposter-tool
 
-        # Clean posters directory before generation
-        rm -f posters/*.png
+        echo "Reading cities configuration..."
+        cat ../cities.json | jq -c '.[]' | while read -r city_data; do
+          city=$(echo "$city_data" | jq -r '.city')
+          country=$(echo "$city_data" | jq -r '.country')
+          radius=$(echo "$city_data" | jq -r '.radius')
 
-        # Generate Rotterdam with ocean theme (6km radius for larger area coverage)
-        echo "Generating Rotterdam ocean theme..."
-        python create_map_poster.py --city Rotterdam --country Netherlands --theme ocean --distance 6000
-        echo "Contents of posters directory:"
-        ls -lah posters/ || echo "Posters directory is empty or doesn't exist"
+          # Process each theme for this city
+          echo "$city_data" | jq -r '.themes[]' | while read -r theme; do
+            # Create filename (lowercase city with spaces replaced by hyphens)
+            filename=$(echo "${city}-${theme}.png" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
 
-        # Check if any PNG files were generated and copy
-        if ls posters/*.png 1> /dev/null 2>&1; then
-          cp posters/*.png ../public/images/rotterdam-ocean.png
-          echo "Successfully copied Rotterdam ocean poster"
-        else
-          echo "ERROR: Rotterdam ocean poster was not generated"
-          exit 1
-        fi
+            # Check if poster already exists
+            if [ -f "../public/images/${filename}" ]; then
+              echo "✓ Skipping ${city} (${theme}) - already exists"
+            else
+              echo "→ Generating ${city} (${theme}) with ${radius}m radius..."
+
+              # Clean posters directory before generation
+              rm -f posters/*.png
+
+              # Generate the poster
+              python create_map_poster.py --city "$city" --country "$country" --theme "$theme" --distance "$radius"
+
+              # Check if poster was generated and copy it
+              if ls posters/*.png 1> /dev/null 2>&1; then
+                cp posters/*.png "../public/images/${filename}"
+                echo "✓ Successfully generated ${filename}"
+              else
+                echo "⚠ Warning: Failed to generate ${filename}"
+              fi
+            fi
+          done
+        done
+
+        echo ""
+        echo "Generation complete. Final poster count: $(ls -1 ../public/images/*.png 2>/dev/null | wc -l)"
 
     - name: Generate index.html
       run: |
-        cat > public/index.html << 'EOF'
+        # Start HTML file
+        cat > public/index.html << 'HTMLSTART'
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -98,31 +119,61 @@ jobs:
             </header>
 
             <main class="gallery">
-                <div class="city-section">
-                    <h2>Haarlem, Netherlands</h2>
-                    <div class="poster-grid">
-                        <div class="poster-card">
-                            <img src="images/haarlem-midnight_blue.png" alt="Haarlem - Midnight Blue" loading="lazy">
-                            <div class="poster-info">
-                                <h3>Midnight Blue</h3>
-                                <p>A calming blue palette perfect for modern interiors</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        HTMLSTART
 
-                <div class="city-section">
-                    <h2>Rotterdam, Netherlands</h2>
-                    <div class="poster-grid">
+        # Generate city sections dynamically
+        cat cities.json | jq -c '.[]' | while read -r city_data; do
+          city=$(echo "$city_data" | jq -r '.city')
+          country=$(echo "$city_data" | jq -r '.country')
+          radius=$(echo "$city_data" | jq -r '.radius')
+
+          # Check if any posters exist for this city
+          city_lower=$(echo "$city" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+          if ls public/images/${city_lower}-*.png 1> /dev/null 2>&1; then
+            echo "                <div class=\"city-section\">" >> public/index.html
+            echo "                    <h2>${city}, ${country}</h2>" >> public/index.html
+            echo "                    <div class=\"poster-grid\">" >> public/index.html
+
+            # Add each theme poster
+            echo "$city_data" | jq -r '.themes[]' | while read -r theme; do
+              filename="${city_lower}-${theme}.png"
+              if [ -f "public/images/${filename}" ]; then
+                # Format theme name for display
+                theme_display=$(echo "$theme" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+
+                # Add theme descriptions
+                case "$theme" in
+                  midnight_blue) desc="Calming blue palette perfect for modern interiors" ;;
+                  ocean) desc="Deep ocean tones with crisp white streets, ${radius}m radius" ;;
+                  sunset) desc="Warm sunset tones capturing the golden hour, ${radius}m radius" ;;
+                  terracotta) desc="Classical earth tones with Mediterranean warmth, ${radius}m radius" ;;
+                  contrast_zones) desc="Modern high contrast design, ${radius}m radius" ;;
+                  neon_cyberpunk) desc="Vibrant neon colors with urban energy, ${radius}m radius" ;;
+                  warm_beige) desc="Neutral warm palette with elegant simplicity, ${radius}m radius" ;;
+                  pastel_dream) desc="Soft romantic pastel colors, ${radius}m radius" ;;
+                  forest) desc="Natural forest greens with organic feel, ${radius}m radius" ;;
+                  *) desc="Unique artistic interpretation, ${radius}m radius" ;;
+                esac
+
+                cat >> public/index.html << POSTER
                         <div class="poster-card">
-                            <img src="images/rotterdam-ocean.png" alt="Rotterdam - Ocean" loading="lazy">
+                            <img src="images/${filename}" alt="${city} - ${theme_display}" loading="lazy">
                             <div class="poster-info">
-                                <h3>Ocean</h3>
-                                <p>Deep ocean tones with crisp white streets, 6km radius capturing the vibrant port city</p>
+                                <h3>${theme_display}</h3>
+                                <p>${desc}</p>
                             </div>
                         </div>
-                    </div>
-                </div>
+        POSTER
+              fi
+            done
+
+            echo "                    </div>" >> public/index.html
+            echo "                </div>" >> public/index.html
+          fi
+        done
+
+        # Close HTML file
+        cat >> public/index.html << 'HTMLEND'
             </main>
 
             <footer>
@@ -131,7 +182,7 @@ jobs:
             </footer>
         </body>
         </html>
-        EOF
+        HTMLEND
 
     - name: Generate CSS
       run: |

@@ -10,5 +10,47 @@
     "country": "Netherlands",
     "themes": ["ocean"],
     "radius": 6000
+  },
+  {
+    "city": "Barcelona",
+    "country": "Spain",
+    "themes": ["sunset"],
+    "radius": 5500
+  },
+  {
+    "city": "Rome",
+    "country": "Italy",
+    "themes": ["terracotta"],
+    "radius": 5500
+  },
+  {
+    "city": "Milan",
+    "country": "Italy",
+    "themes": ["contrast_zones"],
+    "radius": 5500
+  },
+  {
+    "city": "New York",
+    "country": "United States",
+    "themes": ["neon_cyberpunk"],
+    "radius": 8000
+  },
+  {
+    "city": "Dallas",
+    "country": "United States",
+    "themes": ["warm_beige"],
+    "radius": 7000
+  },
+  {
+    "city": "Paris",
+    "country": "France",
+    "themes": ["pastel_dream"],
+    "radius": 5500
+  },
+  {
+    "city": "Utrecht",
+    "country": "Netherlands",
+    "themes": ["forest"],
+    "radius": 4000
   }
 ]
