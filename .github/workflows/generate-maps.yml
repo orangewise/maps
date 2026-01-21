@@ -100,6 +100,32 @@ jobs:
         echo ""
         echo "Generation complete. Final poster count: $(ls -1 ../public/images/*.png 2>/dev/null | wc -l)"
 
+    - name: Optimize PNG images
+      run: |
+        # Install OptiPNG for lossless PNG compression
+        sudo apt-get install -y optipng
+
+        echo "Optimizing PNG images..."
+        echo "Original sizes:"
+        du -sh public/images/
+
+        # Optimize all PNG images with OptiPNG (level 2 for good compression/speed balance)
+        # -o2: optimization level (0-7, 2 is good balance)
+        # -strip all: remove metadata to reduce size
+        find public/images -name "*.png" -print0 | while IFS= read -r -d '' file; do
+          original_size=$(stat -c%s "$file")
+          echo "Optimizing $(basename "$file")..."
+          optipng -o2 -strip all "$file"
+          new_size=$(stat -c%s "$file")
+          reduction=$((100 - (new_size * 100 / original_size)))
+          echo "  Reduced by ${reduction}% ($(numfmt --to=iec $original_size) → $(numfmt --to=iec $new_size))"
+        done
+
+        echo ""
+        echo "Optimized sizes:"
+        du -sh public/images/
+        echo "Optimization complete!"
+
     - name: Generate index.html
       run: |
         # Start HTML file
